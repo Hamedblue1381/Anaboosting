@@ -1,5 +1,5 @@
-# Anaboosting
-Anaboosting Website
+# anashop
+Anashop
 
 import ana.sql into your phpmyadmin
 
