@@ -26,10 +26,10 @@ $link=mysqli_connect("localhost","root","","ana");
 if(mysqli_connect_errno())
     exit("this error happend:". mysqli_connect_error());
 $username=$_SESSION['username'];
-$number=$_SESSION['number'];
+$steampass=$_SESSION['steampass'];
 
-$query="INSERT INTO `battlecup` (`btlcuptier`, `btlcupteam`, `username`, `number` )
-VALUES ('$btlcuptier', '$btlcupteam' , '$username', '$number');";
+$query="INSERT INTO `battlecup` (`btlcuptier`, `btlcupteam`, `username`, `steampass` )
+VALUES ('$btlcuptier', '$btlcupteam' , '$username', '$steampass');";
 if(mysqli_query($link,$query)===true) {
 
 

@@ -106,12 +106,12 @@
 
         /*-- end reset --*/
         body {
-            background: #76b852;
+            background: #3591b8;
             /* fallback for old browsers */
-            background: -webkit-linear-gradient(to top, #76b852, #8DC26F);
-            background: -moz-linear-gradient(to top, #76b852, #8DC26F);
-            background: -o-linear-gradient(to top, #76b852, #8DC26F);
-            background: linear-gradient(to top, #76b852, #8DC26F);
+            background: -webkit-linear-gradient(to top, #3591b8, #00b4cc);
+            background: -moz-linear-gradient(to top, #3591b8, #00b4cc);
+            background: -o-linear-gradient(to top, #3591b8, #00b4cc);
+            background: linear-gradient(to top, #3591b8, #00b4cc);
             background-size: cover;
             background-attachment: fixed;
             font-family: 'Roboto', sans-serif;
@@ -206,9 +206,9 @@
         input[type="submit"] {
             font-size: .9em;
             color: #fff;
-            background: #76b852;
+            background: #3591b8;
             outline: none;
-            border: 1px solid #76b852;
+            border: 1px solid #3591b8;
             cursor: pointer;
             padding: 0.9em;
             -webkit-appearance: none;
@@ -223,7 +223,7 @@
             -o-transition: .5s all;
             -ms-transition: .5s all;
             transition: .5s all;
-            background: #8DC26F;
+            background:#00b4cc;
         }
 
         .agileits-top p {
@@ -243,7 +243,7 @@
         }
 
         .agileits-top p a:hover {
-            color: #76b852;
+            color:#3591b8;
         }
 
         /*-- //main --*/
@@ -257,7 +257,7 @@
         }
 
         input.checkbox {
-            background: #8DC26F;
+            background: #00b4cc;
             cursor: pointer;
             width: 1.2em;
             height: 1.2em;
@@ -782,33 +782,43 @@
 <body>
 <!-- main -->
 <div class="main-w3layouts wrapper">
-    <h1>Register in AnaBoosting</h1>
+    <h1>Register in AnaBoosting as a Booster</h1>
     <div class="main-agileinfo">
         <div class="agileits-top">
-            <form action="action_signin.php" method="post">
-                <input class="text" type="text" name="Username" placeholder="نام کاربری استیم" required="" autocomplete="off">
-                <input class="text email" type="email" name="email" placeholder=" ایمیل استیم" required="">
-                <input class="text email" type="password" name="steampass" placeholder=" پسوورد اکانت استیم" required="">
+            <form action="action_signinboost.php" method="post">
+                <input class="text" type="text" name="Username" placeholder="نام کاربری" required="" autocomplete="off">
+                <input class="text email" type="email" name="email" placeholder="ایمیل" required="">
                 <input class="text"   id='number' type="number" name="number" placeholder="شماره تلفن" required="" autocomplete="off">
                 <input class="text" style=" margin: 2em 0;" type="password" name="password" placeholder="رمز عبور" required="" autocomplete="off">
                 <input class="text w3lpass" type="password" name="password" placeholder="تایید رمز عبور" required="">
                 <div class="wthree-text">
                     <label class="anim">
-                        <input type="checkbox" class="checkbox" required="">
-                        <span>I Agree To The Terms & Conditions</span>
+                        <input type="checkbox" name="boost" class="checkbox" >
+                        <span>boost</span>
                     </label>
+                    <label class="anim">
+                        <input type="checkbox" name="coach" class="checkbox" >
+                        <span>Coach</span>
+                    </label>
+                    <label class="anim">
+                        <input type="checkbox" name="calibrate" class="checkbox" >
+                        <span>Calibrate</span>
+                    </label>
+                    <label class="anim">
+                        <input type="checkbox" name="battlecup" class="checkbox" >
+                        <span>BattleCup</span>
+                    </label>
+
                     <div class="clear"> </div>
                 </div>
                 <input type="submit" value="SIGNUP">
             </form>
-            <p>Are you a Booster? <a href="boostersignup.php"> Signup now!</a></p>
+            <p>You have an Account? <a href="index.php#login"> Login Now!</a></p>
         </div>
     </div>
-    <!-- copyright -->
     <div class="colorlibcopy-agile">
         <p>AnaBoosting the best Dota2 boosting website | Design by <a href="https://t.me/UchihaHamed" target="_blank">Hamed</a></p>
     </div>
-    <!-- //copyright -->
     <ul class="colorlib-bubbles">
         <li></li>
         <li></li>
@@ -822,7 +832,6 @@
         <li></li>
     </ul>
 </div>
-<!-- //main -->
 </body>
 </html>
 

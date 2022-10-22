@@ -24,10 +24,10 @@ $link=mysqli_connect("localhost","root","","ana");
 if(mysqli_connect_errno())
     exit("this error happend:". mysqli_connect_error());
 $username=$_SESSION['username'];
-$number=$_SESSION['number'];
+$steampass=$_SESSION['steampass'];
 
-$query="INSERT INTO `coach` (`coachmmr`, `role`, `username`, `number` )
-VALUES ('$coachmmr', '$rolec' , '$username', '$number');";
+$query="INSERT INTO `coach` (`coachmmr`, `role`, `username`, `steampass` )
+VALUES ('$coachmmr', '$rolec' , '$username', '$steampass');";
 if(mysqli_query($link,$query)===true) {
 
 

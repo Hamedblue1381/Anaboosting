@@ -1,6 +1,8 @@
 <?php
 session_start();
 include ("header.php");
+$currentdate = date('Y-m-d');
+//$_SESSION['date']=$currentdate;
 ?>
 
 <head>
@@ -79,53 +81,367 @@ include ("header.php");
         if(isset($_SESSION['status']) && $_SESSION['status']===true)
         {
             $username=$_SESSION['username'];
-            $type =  $_SESSION['user_type'];
+           // $type =  $_SESSION['type'];
+            if($_SESSION['username']=="admin")
+            {
+                $boost=1;
+                $coach=1;
+                $calibrate=1;
+                $battlecup=1;
+            }
+            else
+            {
+                $boost=0;
+                $coach=0;
+                $calibrate=0;
+                $battlecup=0;
+            }
+            if(isset($_SESSION['boost_type']) && isset($_SESSION['coach_type'])&&
+                isset($_SESSION['calib_type'])&& isset($_SESSION['bcup_type']))
+            {
+            $boost=$_SESSION['boost_type'];
+            $coach=$_SESSION['coach_type'];
+            $calibrate=$_SESSION['calib_type'];
+            $battlecup=$_SESSION['bcup_type'];
+            }
 
-        $query="SELECT * FROM `boostmmr`  ";
+        $query="SELECT * FROM `boostmmr`";
         $result=mysqli_query($link,$query);
         $querycoach="SELECT * FROM `coach`  ";
         $resultcoach=mysqli_query($link,$querycoach);
         $querycalibrate="SELECT * FROM `calibrate` ";
         $resultcalibrate=mysqli_query($link,$querycalibrate);
+        $querybattlecup="SELECT * FROM `battlecup`";
+        $resultbattlecup=mysqli_query($link,$querybattlecup);
+        $queryorder="SELECT * FROM `inprogress`";
+        $resultorder=mysqli_query($link,$queryorder);
+            $queryfinished="SELECT * FROM `finished`";
+            $resultfinished=mysqli_query($link,$queryfinished);
+            $resultfinishedc=mysqli_query($link,$queryfinished);
+            $resultfinishedcalib=mysqli_query($link,$queryfinished);
+            $resultfinishedbcup=mysqli_query($link,$queryfinished);
+            $data=0;
+            $dateaccept=0;
         }
         ?>
-        <?php
-if( isset($_SESSION['status']) && $_SESSION['status']===true && $type=='1'){
-        while($row = mysqli_fetch_array($result)) {
+ <?php
+
+
+if(isset($_SESSION['status']) && $_SESSION['status']===true && $boost==1  ){
+    while($row= mysqli_fetch_array($result)) {
+        while ($roworder = mysqli_fetch_array($resultorder)) {
+            if (isset($roworder['ID'])) {
+                $data = $roworder['ID'];
+                $dateaccept= $roworder['accepted'];
+                $startdate=new DateTime($dateaccept);
+                $enddate=new DateTime($currentdate);
+                $diff=date_diff($enddate,$startdate);
+                $daysdiff=$diff->format('%d');
+            }
+            break 1;
+        }
+
+        if (isset($row)) {
+            if ($data == $row['ID']) {
+                ?>
+                <div style="text-align: center; font-size: 20px;font-weight: bold;">
+                     این سفارش با شماره سفارش
+                <?php echo $data ?>
+                    توسط شما در تاریخ
+                    <?php echo $dateaccept   ?>
+                    دریافت شده
+                    </br>
+                    نوع : بوست MMR
+                    </br>
+                    ام ام آر اولیه :
+
+                <P style="text-align: center; font-size: 20px;font-weight: bold; color: crimson">
+                    <?php echo $row['startmmr']; ?>
+                </P>
+                ام ام آر درخواست شده :
+                <P style="text-align: center; font-size: 20px;font-weight: bold; color: limegreen">
+                    <?php echo $row['finishmmr']; ?>
+                </P>
+                    زمان باقی مانده :
+
+                        <?php if(7-$daysdiff>=5) {
+                            ?>
+                    <P style="text-align: center; font-size: 20px;font-weight: bold; color: limegreen">
+                    <?php
+                         echo 7-$daysdiff;
+                        } else if (7-$daysdiff<=4) { ?>
+                            </P>
+                    <P style="text-align: center; font-size: 20px;font-weight: bold; color: crimson">
+                    <?Php
+                        echo 7-$daysdiff;
+                    }
+                    ?>
+                    </P>
+                    </P>
+                در صورت اتمام سفارش روی دکمه ی زیر کلیک کنید :
+    </div>
+                <form name="finishorder" action="finishorder.php"
+                      style="text-align: center; font-size: 20px;font-weight: bold;color: #0dac00" method="post">
+
+
+                    <input type="hidden" name="id" value="<?php echo $row['ID']; ?>">
+                    <input type="hidden" name="tablename" value="boostmmr">
+                    <div class="wrapper">
+                        <button class="suborder" onclick="finishordersubmit()">انجام شد</button>
+                    </div>
+                    <svg style="visibility: hidden; position: absolute;" width="0" height="0"
+                         xmlns="http://www.w3.org/2000/svg" version="1.1">
+                        <defs>
+                            <filter id="goo">
+                                <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur"/>
+                                <feColorMatrix in="blur" mode="matrix"
+                                               values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9"
+                                               result="goo"/>
+                                <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
+                            </filter>
+                        </defs>
+                    </svg>
+
+                </form>
+
+
+                <?php
+            } else if ($data !== $row['ID']) {
+                ?>
+
+                <p style="text-align: center; font-size: 20px;font-weight: bold;">
+                    شما یک سفارش بوست با مشخصات
+                    <?php echo $row['startmmr']; ?>
+                    تا
+                    <?php echo $row['finishmmr']; ?>
+                    و رول
+                    <?php echo $row['role']; ?>
+                    بصورت
+                    <?php echo $row['soloparty']; ?>
+                    داشته اید
+                    </br>
+                    حداکثر زمان : 7 روز
+                    </br>
+                    اکانت استیم:
+                    <?php echo $row['username']; ?>
+                    رمز اکانت استیم :
+                    <?php echo $row['steampass']; ?>
+                    </br>
+                    دریافت سفارش :
+
+                </p>
+
+
+                <form name="takeorder" action="getorder.php"
+                      style="text-align: center; font-size: 20px;font-weight: bold;color: #0dac00" method="post">
+
+
+                    <input type="hidden" name="id" value="<?php echo $row['ID']; ?>">
+                    <input type="hidden" name="tablename" value="boostmmr">
+                    <div class="wrapper">
+                        <button class="takeorder"  onclick="takeordersubmit()">دریافت</button>
+                    </div>
+                    <svg style="visibility: hidden; position: absolute;" width="0" height="0"
+                         xmlns="http://www.w3.org/2000/svg" version="1.1">
+                        <defs>
+                            <filter id="goo">
+                                <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur"/>
+                                <feColorMatrix in="blur" mode="matrix"
+                                               values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9"
+                                               result="goo"/>
+                                <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
+                            </filter>
+                        </defs>
+                    </svg>
+
+                </form>
+
+
+                <?php
+
+            }
+        } else {
 
             ?>
+            <P style="text-align: center; font-size: 38px; color: #843534">
+
+سفارشی برای نمایش وجود نداره
+
+            </P>
+            <?php
+        }
+    }
+    }
+ if(isset($_SESSION['status']) && $_SESSION['status']===true && $boost==0 ){
+         while ($rowf = mysqli_fetch_array($resultfinished)) {
+             if (isset($rowf['ID']) && isset($rowf['username']) && $rowf['ID']<2000 && $rowf['ID']>=1000 && $username==$rowf['username']) {
+         ?>
+
+
 
         <p style="text-align: center; font-size: 20px;font-weight: bold;">
-           شما یک سفارش بوست با مشخصات
-            <?php echo $row['startmmr']; ?>
-            تا
-            <?php echo $row['finishmmr']; ?>
-            و رول
-            <?php echo $row['role']; ?>
-            بصورت
-            <?php echo $row['soloparty']; ?>
-            داشته اید
-        </br>
-            وضعیت :
-            <span style="text-align: center; font-size: 20px;font-weight: bold;color: red">نامشخص</span>
+
+        سفارش شما با ایدی
+    <?php echo $rowf['ID']; ?>
+    </br>
+    در زمان
+    <?php echo $rowf['finished']; ?>
+    </br>
+    تحویل داده شده
+            </br>
+            وضعیت سفارش را تایید کنید:
         </p>
-            <?php
-        }}
-else {
-    ?>
-    <P style="text-align: center; font-size: 38px; color: #843534">
-        اخباری ثبت نشده!    </P>
+                 <form name="wrongorder" action="blacklist.php"
+                       style="text-align: center; font-size: 20px;font-weight: bold;color: #0dac00" method="post">
+
+
+                     <input type="hidden" name="id" value="<?php echo $rowf['ID']; ?>">
+                     <input type="hidden" name="tablename" value="finished">
+                     <div class="wrapper">
+                         <button class="takeorder"  onclick="wrongorder()">سفارش ناقص</button>
+                     </div>
+                     <svg style="visibility: hidden; position: absolute;" width="0" height="0"
+                          xmlns="http://www.w3.org/2000/svg" version="1.1">
+                         <defs>
+                             <filter id="goo">
+                                 <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur"/>
+                                 <feColorMatrix in="blur" mode="matrix"
+                                                values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9"
+                                                result="goo"/>
+                                 <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
+                             </filter>
+                         </defs>
+                     </svg>
+                 </form>
+                 <form name="orderconfirm" action="orderconfirm.php"
+                       style="text-align: center; font-size: 20px;font-weight: bold;color: #0dac00" method="post">
+                 <input type="hidden" name="id" value="<?php echo $rowf['ID']; ?>">
+                     <input type="hidden" name="tablename" value="finished">
+                     <div class="wrapper">
+                     <button class="suborder"  onclick="rightorder()">سفارش درست</button>
+                     </div>
+    <svg style="visibility: hidden; position: absolute;" width="0" height="0"
+         xmlns="http://www.w3.org/2000/svg" version="1.1">
+        <defs>
+            <filter id="goo">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur"/>
+                <feColorMatrix in="blur" mode="matrix"
+                               values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9"
+                               result="goo"/>
+                <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
+            </filter>
+        </defs>
+    </svg>
+
+                 </form>
+
+
     <?php
-}
-        ?>
+}}}  ?>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         <div class="separator">coach</div>
         <?php
 
-        if(isset($_SESSION['status']) && $_SESSION['status']===true && $type=='1' ){
+        if(isset($_SESSION['status']) && $_SESSION['status']===true && $coach==1 ){
             while($rowc = mysqli_fetch_array($resultcoach)) {
-
+                while ($roworder = mysqli_fetch_array($resultorder)) {
+                    if (isset($roworder['ID'])) {
+                        $data = $roworder['ID'];
+                        $dateaccept= $roworder['accepted'];
+                        $startdate=new DateTime($dateaccept);
+                        $enddate=new DateTime($currentdate);
+                        $diff=date_diff($enddate,$startdate);
+                        $daysdiff=$diff->format('%d');
+                    }
+                    break 1;
+                }
+        if (isset($rowc)) {
+            if ($data == $rowc['ID']) {
                 ?>
+                <div style="text-align: center; font-size: 20px;font-weight: bold;">
+                    این سفارش با شماره سفارش
+                    <?php echo $data ?>
+                    توسط شما در تاریخ
+                    <?php echo $dateaccept   ?>
+                    دریافت شده
+                    </br>
+                    نوع : COACH
+                    </br>
+                    رنک :
 
+                    <P style="text-align: center; font-size: 20px;font-weight: bold; color: crimson">
+                        <?php echo $rowc['coachmmr']; ?>
+                    </P>
+                    رول :
+                    <P style="text-align: center; font-size: 20px;font-weight: bold; color: limegreen">
+                        <?php echo $rowc['role']; ?>
+                    </P>
+
+                    زمان باقی مانده :
+
+                    <?php if(7-$daysdiff>=5) {
+                    ?>
+                    <P style="text-align: center; font-size: 20px;font-weight: bold; color: limegreen">
+                        <?php
+                        echo 7-$daysdiff;
+                        } else if (7-$daysdiff<=4) { ?>
+                    </P>
+                    <P style="text-align: center; font-size: 20px;font-weight: bold; color: crimson">
+                        <?Php
+                        echo 7-$daysdiff;
+                        }
+                        ?>
+                    </P>
+                    در صورت اتمام سفارش روی دکمه ی زیر کلیک کنید :
+                </div>
+                <form name="finishorder" action="finishorder.php"
+                      style="text-align: center; font-size: 20px;font-weight: bold;color: #0dac00" method="post">
+
+
+                    <input type="hidden" name="id" value="<?php echo $rowc['ID']; ?>">
+                    <input type="hidden" name="tablename" value="coach">
+                    <div class="wrapper">
+                        <button class="suborder" onclick="finishordersubmit()">انجام شد</button>
+                    </div>
+                    <svg style="visibility: hidden; position: absolute;" width="0" height="0"
+                         xmlns="http://www.w3.org/2000/svg" version="1.1">
+                        <defs>
+                            <filter id="goo">
+                                <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur"/>
+                                <feColorMatrix in="blur" mode="matrix"
+                                               values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9"
+                                               result="goo"/>
+                                <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
+                            </filter>
+                        </defs>
+                    </svg>
+
+                </form>
+
+
+                <?php
+            } else if ($data !== $rowc['ID']) {
+                ?>
             <p style="text-align: center; font-size: 20px;font-weight: bold;">
                 شما یک سفارش بوست با رنک
                 <?php echo $rowc['coachmmr']; ?>
@@ -135,26 +451,208 @@ else {
                 کوچ
                 داشته اید
                 </br>
-                وضعیت :
-                <span style="text-align: center; font-size: 20px;font-weight: bold;color: red">نامشخص</span>
+                حداکثر زمان : 7 روز
+                </br>
+                اکانت استیم:
+                <?php echo $rowc['username']; ?>
+                رمز اکانت استیم :
+                <?php echo $rowc['steampass']; ?>
+                </br>
+                دریافت سفارش
+
             </p>
+                <form name="takeorder" action="getorder.php" style="text-align: center; font-size: 20px;font-weight: bold;color: #0dac00" method="post">
+
+
+                    <input type="hidden"  name="id" value="<?php echo $rowc['ID'];?>">
+                    <input type="hidden" name="tablename" value="coach">
+                    <div class="wrapper">
+                    <button class="takeorder"  onclick="takeordersubmit()" >دریافت</button>
+                    </div>
+                    <svg style="visibility: hidden; position: absolute;" width="0" height="0" xmlns="http://www.w3.org/2000/svg" version="1.1">
+                        <defs>
+                            <filter id="goo"><feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
+                                <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9" result="goo" />
+                                <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
+                            </filter>
+                        </defs>
+                    </svg>
+
+                </form>
+                <?php
+
+            }
+        } else {
+
+            ?>
+            <P style="text-align: center; font-size: 38px; color: #843534">
+
+                سفارشی برای نمایش وجود نداره
+
+            </P>
+
             <?php
-        }}
-else {
-    ?>
-    <P style="text-align: center; font-size: 38px; color: #843534">
-        اخباری ثبت نشده!    </P>
-    <?php
-}
-        ?>
+        }
+            }
+        }  if(isset($_SESSION['status']) && $_SESSION['status']===true && $coach==0 ){
+
+                while ($rowfc = mysqli_fetch_array($resultfinishedc)) {
+                    if (isset($rowfc['ID']) && isset($rowfc['username']) && $rowfc['ID']<3000 && $rowfc['ID']>=2000 && $username==$rowfc['username']) {
+                        ?>
+
+
+
+                        <p style="text-align: center; font-size: 20px;font-weight: bold;">
+
+                            سفارش شما با ایدی
+                            <?php echo $rowfc['ID']; ?>
+                            </br>
+                            در زمان
+                            <?php echo $rowfc['finished']; ?>
+                            </br>
+                            تحویل داده شده
+                            </br>
+                            وضعیت سفارش را تایید کنید:
+                        </p>
+                        <form name="wrongorder" action="blacklist.php"
+                              style="text-align: center; font-size: 20px;font-weight: bold;color: #0dac00" method="post">
+
+
+                            <input type="hidden" name="id" value="<?php echo $rowfc['ID']; ?>">
+                            <input type="hidden" name="tablename" value="finished">
+                            <div class="wrapper">
+                                <button class="takeorder"  onclick="wrongorder()">سفارش ناقص</button>
+                            </div>
+                            <svg style="visibility: hidden; position: absolute;" width="0" height="0"
+                                 xmlns="http://www.w3.org/2000/svg" version="1.1">
+                                <defs>
+                                    <filter id="goo">
+                                        <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur"/>
+                                        <feColorMatrix in="blur" mode="matrix"
+                                                       values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9"
+                                                       result="goo"/>
+                                        <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
+                                    </filter>
+                                </defs>
+                            </svg>
+                        </form>
+                        <form name="orderconfirm" action="orderconfirm.php"
+                              style="text-align: center; font-size: 20px;font-weight: bold;color: #0dac00" method="post">
+                            <input type="hidden" name="id" value="<?php echo $rowfc['ID']; ?>">
+                            <input type="hidden" name="tablename" value="finished">
+                            <div class="wrapper">
+                                <button class="suborder"  onclick="rightorder()">سفارش درست</button>
+                            </div>
+                            <svg style="visibility: hidden; position: absolute;" width="0" height="0"
+                                 xmlns="http://www.w3.org/2000/svg" version="1.1">
+                                <defs>
+                                    <filter id="goo">
+                                        <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur"/>
+                                        <feColorMatrix in="blur" mode="matrix"
+                                                       values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9"
+                                                       result="goo"/>
+                                        <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
+                                    </filter>
+                                </defs>
+                            </svg>
+
+                        </form>
+
+
+                        <?php
+                    }}} ?>
+
+
+
+
+
+
+
+
+
         <div class="separator">Calibrate</div>
         <?php
 
-        if(isset($_SESSION['status']) && $_SESSION['status']===true && $type=='1' ){
+        if(isset($_SESSION['status']) && $_SESSION['status']===true && $calibrate==1 ){
             while($rowcalib = mysqli_fetch_array($resultcalibrate)) {
-
+        while ($roworder = mysqli_fetch_array($resultorder)) {
+            if (isset($roworder['ID'])) {
+                $data = $roworder['ID'];
+                $dateaccept= $roworder['accepted'];
+                $startdate=new DateTime($dateaccept);
+                $enddate=new DateTime($currentdate);
+                $diff=date_diff($enddate,$startdate);
+                $daysdiff=$diff->format('%d');
+            }
+            break 1;
+        }
+        if (isset($rowcalib)) {
+            if ($data == $rowcalib['ID']) {
                 ?>
+                <div style="text-align: center; font-size: 20px;font-weight: bold;">
+                    این سفارش با شماره سفارش
+                    <?php echo $data ?>
+                    توسط شما در تاریخ
+                    <?php echo $dateaccept   ?>
+                    دریافت شده
+                    </br>
+                    نوع : CALIBRATE
+                    <P style="text-align: center; font-size: 20px;font-weight: bold; color: crimson">
+                <?php
+                if ($rowcalib['new']=='new') { echo $rowcalib['new']; }
+                else { ?>
+                    </P>
+                    </br>
+                    با رنک قبلی :
+                    <P style="text-align: center; font-size: 20px;font-weight: bold; color: crimson">
+                        <?php echo $rowcalib['oldrank']; } ?>
+                    </P>
 
+                    زمان باقی مانده :
+
+                    <?php if(7-$daysdiff>=5) {
+                    ?>
+                    <P style="text-align: center; font-size: 20px;font-weight: bold; color: limegreen">
+                        <?php
+                        echo 7-$daysdiff;
+                        } else if (7-$daysdiff<=4) { ?>
+                    </P>
+                    <P style="text-align: center; font-size: 20px;font-weight: bold; color: crimson">
+                        <?Php
+                        echo 7-$daysdiff;
+                        }
+                        ?>
+                    </P>
+                    در صورت اتمام سفارش روی دکمه ی زیر کلیک کنید :
+                </div>
+                <form name="finishorder" action="finishorder.php"
+                      style="text-align: center; font-size: 20px;font-weight: bold;color: #0dac00" method="post">
+
+
+                    <input type="hidden" name="id" value="<?php echo $rowcalib['ID']; ?>">
+                    <input type="hidden" name="tablename" value="calibrate">
+                    <div class="wrapper">
+                        <button class="suborder" onclick="finishordersubmit()">انجام شد</button>
+                    </div>
+                    <svg style="visibility: hidden; position: absolute;" width="0" height="0"
+                         xmlns="http://www.w3.org/2000/svg" version="1.1">
+                        <defs>
+                            <filter id="goo">
+                                <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur"/>
+                                <feColorMatrix in="blur" mode="matrix"
+                                               values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9"
+                                               result="goo"/>
+                                <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
+                            </filter>
+                        </defs>
+                    </svg>
+
+                </form>
+
+
+                <?php
+            } else if ($data !== $rowcalib['ID']) {
+                ?>
                 <p style="text-align: center; font-size: 20px;font-weight: bold;">
                     شما یک سفارش calibrate
                     <?php
@@ -164,19 +662,339 @@ else {
                     <?php echo $rowcalib['oldrank']; } ?>
                     داشته اید
                     </br>
-                    وضعیت :
-                    <span style="text-align: center; font-size: 20px;font-weight: bold;color: red">نامشخص</span>
+                    حداکثر زمان : 7 روز
+                    </br>
+                    اکانت استیم:
+                    <?php echo $rowcalib['username']; ?>
+                    رمز اکانت استیم :
+                    <?php echo $rowcalib['steampass']; ?>
+                    </br>
+                    دریافت سفارش :
                 </p>
+                <form name="takeorder" action="getorder.php" style="text-align: center; font-size: 20px;font-weight: bold;color: #0dac00" method="post">
+
+
+                    <input type="hidden"  name="id" value="<?php echo $rowcalib['ID'];?>">
+                    <input type="hidden" name="tablename" value="calibrate">
+                    <div class="wrapper">
+                    <button class="takeorder"  onclick="takeordersubmit()" >دریافت</button>
+                    </div>
+                    <svg style="visibility: hidden; position: absolute;" width="0" height="0" xmlns="http://www.w3.org/2000/svg" version="1.1">
+                        <defs>
+                            <filter id="goo"><feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
+                                <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9" result="goo" />
+                                <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
+                            </filter>
+                        </defs>
+                    </svg>
+                </form>
                 <?php
-            }}
-        else {
+
+            }
+        }else {
+
             ?>
             <P style="text-align: center; font-size: 38px; color: #843534">
-                اخباری ثبت نشده!
+
+                سفارشی برای نمایش وجود نداره
+
             </P>
             <?php
         }
+            }
+        }
+            if(isset($_SESSION['status']) && $_SESSION['status']===true && $calibrate==0 ){
+                while ($rowfcalib = mysqli_fetch_array($resultfinishedcalib)) {
+                    if (isset($rowfcalib['ID']) && isset($rowfcalib['username']) && $rowfcalib['ID']<4000 && $rowfcalib['ID']>=3000 && $username==$rowfcalib['username']) {
+                        ?>
+
+
+
+                        <p style="text-align: center; font-size: 20px;font-weight: bold;">
+
+                            سفارش شما با ایدی
+                            <?php echo $rowfcalib['ID']; ?>
+                            </br>
+                            در زمان
+                            <?php echo $rowfcalib['finished']; ?>
+                            </br>
+                            تحویل داده شده
+                            </br>
+                            وضعیت سفارش را تایید کنید:
+                        </p>
+                        <form name="wrongorder" action="blacklist.php"
+                              style="text-align: center; font-size: 20px;font-weight: bold;color: #0dac00" method="post">
+
+
+                            <input type="hidden" name="id" value="<?php echo $rowfcalib['ID']; ?>">
+                            <input type="hidden" name="tablename" value="finished">
+                            <div class="wrapper">
+                                <button class="takeorder"  onclick="wrongorder()">سفارش ناقص</button>
+                            </div>
+                            <svg style="visibility: hidden; position: absolute;" width="0" height="0"
+                                 xmlns="http://www.w3.org/2000/svg" version="1.1">
+                                <defs>
+                                    <filter id="goo">
+                                        <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur"/>
+                                        <feColorMatrix in="blur" mode="matrix"
+                                                       values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9"
+                                                       result="goo"/>
+                                        <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
+                                    </filter>
+                                </defs>
+                            </svg>
+                        </form>
+                        <form name="orderconfirm" action="orderconfirm.php"
+                              style="text-align: center; font-size: 20px;font-weight: bold;color: #0dac00" method="post">
+                            <input type="hidden" name="id" value="<?php echo $rowfcalib['ID']; ?>">
+                            <input type="hidden" name="tablename" value="finished">
+                            <div class="wrapper">
+                                <button class="suborder"  onclick="rightorder()">سفارش درست</button>
+                            </div>
+                            <svg style="visibility: hidden; position: absolute;" width="0" height="0"
+                                 xmlns="http://www.w3.org/2000/svg" version="1.1">
+                                <defs>
+                                    <filter id="goo">
+                                        <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur"/>
+                                        <feColorMatrix in="blur" mode="matrix"
+                                                       values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9"
+                                                       result="goo"/>
+                                        <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
+                                    </filter>
+                                </defs>
+                            </svg>
+
+                        </form>
+
+
+                        <?php
+                    }}}  ?>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <div class="separator">Battle Cup</div>
+        <?php
+
+        if(isset($_SESSION['status']) && $_SESSION['status']===true && $battlecup==1 ){
+        while($rowbcup = mysqli_fetch_array($resultbattlecup)) {
+        while ($roworder = mysqli_fetch_array($resultorder)) {
+            if (isset($roworder['ID'])) {
+                $data = $roworder['ID'];
+                $dateaccept= $roworder['accepted'];
+                $startdate=new DateTime($dateaccept);
+                $enddate=new DateTime($currentdate);
+                $diff=date_diff($enddate,$startdate);
+                $daysdiff=$diff->format('%d');
+            }
+            break 1;
+        }
+        if (isset($rowbcup)) {
+            if ($data == $rowbcup['ID']) {
         ?>
+                <div style="text-align: center; font-size: 20px;font-weight: bold;">
+                    این سفارش با شماره سفارش
+                    <?php echo $data ?>
+                    توسط شما در تاریخ
+                    <?php echo $dateaccept   ?>
+                    دریافت شده
+                    </br>
+                    نوع : Battle Cup
+                    </br>
+                    نام تیم :
+
+                    <P style="text-align: center; font-size: 20px;font-weight: bold; color: crimson">
+                        <?php    echo $rowbcup['btlcupteam'];?>
+                    </P>
+                    تیر :
+                    <P style="text-align: center; font-size: 20px;font-weight: bold; color: limegreen">
+                        <?php echo $rowbcup['btlcuptier'];  ?>
+                    </P>
+
+                    زمان باقی مانده :
+
+                    <?php if(7-$daysdiff>=5) {
+                    ?>
+                    <P style="text-align: center; font-size: 20px;font-weight: bold; color: limegreen">
+                        <?php
+                        echo 7-$daysdiff;
+                        } else if (7-$daysdiff<=4) { ?>
+                    </P>
+                    <P style="text-align: center; font-size: 20px;font-weight: bold; color: crimson">
+                        <?Php
+                        echo 7-$daysdiff;
+                        }
+                        ?>
+                    </P>
+                    در صورت اتمام سفارش روی دکمه ی زیر کلیک کنید :
+                </div>
+                <form name="finishorder" action="finishorder.php"
+                      style="text-align: center; font-size: 20px;font-weight: bold;color: #0dac00" method="post">
+
+
+                    <input type="hidden" name="id" value="<?php echo $rowbcup['ID']; ?>">
+                    <input type="hidden" name="tablename" value="battlecup">
+                    <div class="wrapper">
+                        <button class="suborder" onclick="finishordersubmit()">انجام شد</button>
+                    </div>
+                    <svg style="visibility: hidden; position: absolute;" width="0" height="0"
+                         xmlns="http://www.w3.org/2000/svg" version="1.1">
+                        <defs>
+                            <filter id="goo">
+                                <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur"/>
+                                <feColorMatrix in="blur" mode="matrix"
+                                               values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9"
+                                               result="goo"/>
+                                <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
+                            </filter>
+                        </defs>
+                    </svg>
+
+                </form>
+
+
+                <?php
+            } else if ($data !== $rowbcup['ID']) {
+                ?>
+        <p style="text-align: center; font-size: 20px;font-weight: bold;">
+             شما یک سفارش Battle Cup با نام تیم
+            <?php
+            echo $rowbcup['btlcupteam'];
+            ?>
+                در تیر
+            <?php echo $rowbcup['btlcuptier'];  ?>
+            داشته اید
+            </br>
+            حداکثر زمان : 7 روز
+            </br>
+            اکانت استیم:
+            <?php echo $rowbcup['username']; ?>
+            رمز اکانت استیم :
+            <?php echo $rowbcup['steampass']; ?>
+            </br>
+           دریافت سفارش :
+        </p>
+            <form name="takeorder" action="getorder.php" style="text-align: center; font-size: 20px;font-weight: bold;color: #0dac00" method="post">
+
+
+                <input type="hidden"  name="id" value="<?php echo $rowbcup['ID'];?>">
+                <input type="hidden" name="tablename" value="battlecup">
+                <div class="wrapper">
+                <button class="takeorder" onclick="takeordersubmit()" >دریافت</button>
+                </div>
+                <svg style="visibility: hidden; position: absolute;" width="0" height="0" xmlns="http://www.w3.org/2000/svg" version="1.1">
+                    <defs>
+                        <filter id="goo"><feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
+                            <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9" result="goo" />
+                            <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
+                        </filter>
+                    </defs>
+                </svg>
+            </form>
+                <?php
+
+            }
+        }else {
+
+            ?>
+            <P style="text-align: center; font-size: 38px; color: #843534">
+
+                سفارشی برای نمایش وجود نداره
+
+            </P>
+            <?php
+        }
+        }
+        }
+
+        if(isset($_SESSION['status']) && $_SESSION['status']===true && $calibrate==0 ){
+            while ($rowfbcup = mysqli_fetch_array($resultfinishedbcup)) {
+                if (isset($rowfbcup['ID']) && isset($rowfbcup['username']) && $rowfcalib['ID']<5000 && $rowfbcup['ID']>=4000 && $username==$rowfbcup['username']) {
+                    ?>
+
+
+
+                    <p style="text-align: center; font-size: 20px;font-weight: bold;">
+
+                        سفارش شما با ایدی
+                        <?php echo $rowfbcup['ID']; ?>
+                        </br>
+                        در زمان
+                        <?php echo $rowfbcup['finished']; ?>
+                        </br>
+                        تحویل داده شده
+                        </br>
+                        وضعیت سفارش را تایید کنید:
+                    </p>
+                    <form name="wrongorder" action="blacklist.php"
+                          style="text-align: center; font-size: 20px;font-weight: bold;color: #0dac00" method="post">
+
+
+                        <input type="hidden" name="id" value="<?php echo $rowfbcup['ID']; ?>">
+                        <input type="hidden" name="tablename" value="finished">
+                        <div class="wrapper">
+                            <button class="takeorder"  onclick="wrongorder()">سفارش ناقص</button>
+                        </div>
+                        <svg style="visibility: hidden; position: absolute;" width="0" height="0"
+                             xmlns="http://www.w3.org/2000/svg" version="1.1">
+                            <defs>
+                                <filter id="goo">
+                                    <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur"/>
+                                    <feColorMatrix in="blur" mode="matrix"
+                                                   values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9"
+                                                   result="goo"/>
+                                    <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
+                                </filter>
+                            </defs>
+                        </svg>
+                    </form>
+                    <form name="orderconfirm" action="orderconfirm.php"
+                          style="text-align: center; font-size: 20px;font-weight: bold;color: #0dac00" method="post">
+                        <input type="hidden" name="id" value="<?php echo $rowfbcup['ID']; ?>">
+                        <input type="hidden" name="tablename" value="finished">
+                        <div class="wrapper">
+                            <button class="suborder"  onclick="rightorder()">سفارش درست</button>
+                        </div>
+                        <svg style="visibility: hidden; position: absolute;" width="0" height="0"
+                             xmlns="http://www.w3.org/2000/svg" version="1.1">
+                            <defs>
+                                <filter id="goo">
+                                    <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur"/>
+                                    <feColorMatrix in="blur" mode="matrix"
+                                                   values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9"
+                                                   result="goo"/>
+                                    <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
+                                </filter>
+                            </defs>
+                        </svg>
+
+                    </form>
+
+
+                    <?php
+                }}} ?>
+
+
+
+
+
+
+
+
     </div>
 <img src="images/dsgfws.png" style=" position: relative;
     margin-left: 0 ;
@@ -856,6 +1674,19 @@ battle cup
             document.calibratesub.submit();
         }
         else { window.alert('لطفا وضعیت اکانت خود را مشخص کنید'); }
+        }
+        function takeordersubmit() {
+            document.takeorder.submit();
+        }
+        function finishordersubmit(){
+            document.finishorder.submit();
+
+        }
+        function wrongorder(){
+        document.wrongorder.submit();
+        }
+        function rightorder(){
+            document.orderconfirm.submit();
         }
     function logout()
     {

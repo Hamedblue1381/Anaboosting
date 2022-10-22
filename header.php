@@ -229,7 +229,7 @@
                 <?php
             } else {
             ?>
-            <a href="#" onclick="document.getElementById('id01').style.display='block'" data-toggle="tooltip" class="tip-left" title="login" >
+            <a href="#login" onclick="document.getElementById('id01').style.display='block'" data-toggle="tooltip" class="tip-left" title="login" >
                 <img src="user.png" style="width: auto;height: auto" alt="login"> </a>
             <?php
             }
@@ -237,7 +237,8 @@
             <div id="id01" class="modal1">
                 <script>
                     if (window.location.hash === '#login') {
-                        document.getElementById('id01').style.display='block'
+                        document.getElementById('id01').style.display='block';
+                        document.getElementById('id02').style.display='none';
                     }
                 </script>
 
@@ -268,17 +269,60 @@
                                 class="cancelbtn">Cancel
                         </button>
                         <br/>
-                        <span class="psw">Forgot <a href="#" style="color: blue">password?</a></span>
+                        <span class="psw">Are you a <a href="index.php#loginboost"  onclick="document.getElementById('id02').style.display='block';document.getElementById('id01').style.display='none'"
+                                                       style="color: blue">booster?</a></span>
                     </div>
                 </form>
             </div>
+        <!-- booster form -->
+            <div id="id02" class="modal1">
+                <script>
+                    if (window.location.hash === '#loginboost') {
+                        document.getElementById('id02').style.display='block';
+                        document.getElementById('id01').style.display='none';
+                    }
+                </script>
 
+                <form class="modal-content animate" action="booster_login.php" method="post">
+                    <div class="imgcontainer">
+                            <span onclick="close_modal()" class="close"
+                                  title="Close Modal">&times;</span>
+                        <img src="images/booster.jpg" alt="Avatar" class="avatar">
+                    </div>
+
+                    <div class="container2">
+                        <label for="uname"><b>Username</b></label>
+                        <input type="text" placeholder="Enter Username" name="uname" id="uname" required>
+                        <br/>
+                        <label for="psw"><b>Password</b></label>
+                        <input type="password" placeholder="Enter Password" name="psw" id="psw" required>
+                        <br/>
+                        <button type="submit" class="loginbtn">Login</button>
+                        <br/>
+                        <label>
+                            <input type="checkbox" checked="checked" name="remember" > Remember me
+                        </label>
+                        <p>Do you have a account? Click <a href="boostersignup.php"  style="color:dodgerblue;display: inline">here</a>.</p>
+                    </div>
+
+                    <div class="container2" style="background-color:#f1f1f1">
+                        <button type="button" onclick="document.getElementById('id01').style.display='none'"
+                                class="cancelbtn">Cancel
+                        </button>
+                        <br/>
+                       <!-- <span class="psw">Are you a <a href="index.php#loginboost" style="color: blue">?</a></span> -->
+                    </div>
+                </form>
+            </div>
             <script>
                 if (window.location.hash === '#login') {
                     document.getElementById('id01').style.display='block'
                 }
-
+                if (window.location.hash === '#loginboost') {
+                    document.getElementById('id02').style.display='block'
+                }
                 var modal = document.getElementById('id01');
+                var modal2 = document.getElementById('id02');
 
 
                 window.onclick = function(event) {
@@ -286,8 +330,15 @@
                         modal.style.display = "none";
                     }
                 }
+
+                window.onclick = function(event) {
+                    if (event.target === modal2) {
+                        modal2.style.display = "none";
+                    }
+                }
                 function close_modal() {
                     document.getElementById('id01').style.display='none';
+                    document.getElementById('id02').style.display='none';
                     window.location.replace("index.php");
 
                 }

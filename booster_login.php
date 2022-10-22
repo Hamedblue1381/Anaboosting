@@ -14,24 +14,33 @@ else
 $link=mysqli_connect("localhost","root","","ana");
 if(mysqli_connect_errno())
     exit("this error happend:". mysqli_connect_errno());
-$query="SELECT * FROM users WHERE username='$username' AND password='$password'";
+$query="SELECT * FROM boosters WHERE username='$username' AND password='$password'";
 $result=mysqli_query($link,$query);
 $row=mysqli_fetch_array($result);
 if($row) {
     $_SESSION["status"]=true;
     $_SESSION['username']=$row['username'];
-    $_SESSION['steampass']=$row['steampass'];
-    $_SESSION['user_type']=$row['user_type'];
-    if ($row['user_type']==0)
-        $_SESSION['type'] = "public";
-    elseif ($row['user_type'] == 1)
-        $_SESSION['type'] = "admin";
-    ?>
+    $_SESSION['number']=$row['number'];
+    $_SESSION['boost_type']=$row['boosterstat'];
+    $_SESSION['coach_type']=$row['coachstat'];
+    $_SESSION['calib_type']=$row['calibratestat'];
+    $_SESSION['bcup_type']=$row['battlecupstat'];
+
+if($row['score']<0){
+    mysqli_query($link,"DELETE FROM `boosters` WHERE `score` < -2;");
+    echo ("YOU ARE BLACKLISTED");
+}
+
+ ?>
+
     <script>
         window.alert("Welcome to Site");
         location.replace("index.php");
     </script>
+
     <?php
+
+
 }
 else
     echo("<h3 style='color:red;'><b> your username is not allowed to login </b></h3>");

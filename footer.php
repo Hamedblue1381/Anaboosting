@@ -41,7 +41,7 @@
     </div>
 <div class="bottom-middle">
      <div class="separator" style="border-bottom: whitesmoke">
-        2021-2022 All Copyright reserved to Hamed!
+        2022-2023 All Copyright reserved to Hamed!
     </div>
 
 

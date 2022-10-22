@@ -25,11 +25,11 @@ $link=mysqli_connect("localhost","root","","ana");
 if(mysqli_connect_errno())
     exit("this error happend:". mysqli_connect_error());
 $username=$_SESSION['username'];
-$number=$_SESSION['number'];
-echo ($number);
+$steampass=$_SESSION['steampass'];
+echo ($steampass);
 echo ($username);
-$query="INSERT INTO `calibrate` (`oldrank`, `new`, `username`, `number`)
-VALUES ('$oldacc', '$newacc' , '$username', '$number')";
+$query="INSERT INTO `calibrate` (`oldrank`, `new`, `username`, `steampass`)
+VALUES ('$oldacc', '$newacc' , '$username', '$steampass')";
 if(mysqli_query($link,$query)===true) {
 
     if($calibstat=='new'){
